@@ -51,9 +51,6 @@ app.post('/login', urlencodedParser, function(req, res){
 	});
 
 
-
-	// res.sendStatus(200);
-
 });
 
 app.get('/whoami', urlencodedParser, function(req, res){
@@ -76,9 +73,6 @@ app.post('/register', urlencodedParser, function(req, res){
 	if(!req.body){
 		return res.sendStatus(400);
 	}
-	// t = String(req.body.userName)*Number(req.body.userAge);
-	// req.body.userName
-	// req.body.userAge
 	res.sendStatus(200);
 });
 
@@ -130,11 +124,9 @@ app.get('/', function (req, res) {
 			<li>`+3*99+`</li>
 		</ul>
 		`);
-	// res.sendFile(__dirname + "/public/index.html")
 });
 
 app.get('/first', function (req, res) {
-	// Числа от 1 до 100
 	var t = "";
 	let a = req.query.a;
 	let b = req.query.b;
@@ -149,7 +141,6 @@ app.get('/first', function (req, res) {
 });
 
 app.get('/second', function (req, res) {
-	// Появляется alert с любым текстом
 	res.send(`
 		<script type="text/javascript">
 			alert("Hello");
@@ -194,8 +185,6 @@ app.get('/all',  function(req, res){
 
 	
 });
-
-// pug
 
 app.listen(3000, function () {
 	console.log('I am alive! On 3000');
