@@ -10,10 +10,6 @@ const urlencodedParser = bodyParser.urlencoded({extended:false});
 
 let db = new sqlite3.Database('my.db')
 
-// db.close();
-
-// db.run(`INSERT INTO Users(username, password_hash) VALUES ('ilya', 'sha1$dc6dd8d3$1$8cb570b01dcbc333f976e509ea22896829ca004b')`);
-
 app.set('views', './views')
 app.set('view engine', 'pug')
 
