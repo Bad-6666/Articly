@@ -169,15 +169,6 @@ app.get('/second', function (req, res) {
 		`);
 });
 
-app.get('/site', function (req, res) {
-	var name = "Hey";
-	var text = "azazazazazazazazazazazazazaz"
-	var a = "John"
-
-	res.render('index', {title:"Article", name:name,
-		text: text, author: a})
-});
-
 app.get('/p', function(req, res){
 	let id = req.query.id;
 
