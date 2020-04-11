@@ -1,235 +1,86 @@
 var express = require('express');
-var bodyParser = require('body-parser');
-var sqlite3 = require('sqlite3').verbose();
-var passwordHash = require('password-hash')
-var cookieSession = require('cookie-session') 
 var app = express();
+var bodyParser = require('body-parser');
+var multer = require('multer');
+var upload = multer();
+var session = require('express-session');
+var cookieParser = require('cookie-parser');
 
+app.set('view engine', 'pug');
+app.set('views','./views');
 
-const urlencodedParser = bodyParser.urlencoded({extended:false});
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(upload.array());
+app.use(cookieParser());
+app.use(session({secret: "qwertyuiop", resave: true, saveUninitialized: true}));
 
-let db = new sqlite3.Database('my.db')
+var Users = [];
 
-app.set('views', './views')
-app.set('view engine', 'pug')
-
-
-
-app.use(cookieSession({
-	name: 'session',
-	keys: ['key1', 'key2'],
-	resave: false,
-	saveUninitialized: false
-}));
-
-
-app.get('/login', urlencodedParser, function(req, res){
-	res.sendFile(__dirname + "/login.html");
+app.get('/signup', function(req, res){
+	res.render('signup');
 });
 
-app.post('/login', urlencodedParser, function(req, res){ 
-	if(!req.body){
-		return res.sendStatus(400);
-	}
- 	
-	var l = req.body.login
-	var p = req.body.password
-	
-	sessionData = req.session;
-	sql = `SELECT * FROM Users WHERE username='${l}'`;
-	db.each(sql, function(err, row) {
-		if (passwordHash.verify(p, row.password_hash)) {
-			console.log("Good");
-			sessionData.auth = true;
-			req.session.save()
-		}
-		else {
-			console.log("Bad")
-			sessionData.auth = false
-			req.session.save()
-		}
-	});
-
-
-
-	// res.sendStatus(200);
-
-});
-
-app.get('/whoami', urlencodedParser, function(req, res){
-	console.log("session", req.session.auth);
-	if (req.session.auth) {
-		res.send("Вы вошли!  :)")
-	}
-	else {
-		res.send("Вы не вошли! :(")
-	}
-});
-
-
-app.get('/register', urlencodedParser, function(req, res){
-	res.sendFile(__dirname + "/index.html");
-});
-
-
-app.post('/register', urlencodedParser, function(req, res){
-	if(!req.body){
-		return res.sendStatus(400);
-	}
-	// t = String(req.body.userName)*Number(req.body.userAge);
-	// req.body.userName
-	// req.body.userAge
-	res.sendStatus(200);
-});
-
-app.get('/posts', urlencodedParser, 
-
-function(req, res, next){
-	res.sendFile(__dirname + "/posts.html");
-	next();
-},
-
-function (req, res){
-	res.redirect('/all');
-}
-);
-
-
-app.post('/posts', urlencodedParser, function(req, res){
-	if(!req.body){
-		return res.sendStatus(400);
-	}
-
-	var ttl = req.body.title
-	var txt = req.body.text
-
-	db.run(`INSERT INTO Posts(title, text) VALUES ('${ttl}', '${txt}')`);
-
-	res.sendStatus(200);
-});
-
-
-
-app.post('/articles', urlencodedParser, function(req, res){
-	if(!req.body){
-		return res.sendStatus(400);
-	}
-	console.log(req.body.title);
-	res.sendStatus(200);
-});
-
-
-
-app.get('/', function (req, res) { 
-	let a = "QWERTY"
-	res.send(`
-		<h1>Hello!</h1>
-		<ul>
-			<li>`+a+`</li>
-			<li>`+2*99+`</li>
-			<li>`+3*99+`</li>
-		</ul>
-		`);
-	// res.sendFile(__dirname + "/public/index.html")
-});
-
-app.get('/first', function (req, res) {
-	// Числа от 1 до 100
-	var t = "";
-	let a = req.query.a;
-	let b = req.query.b;
-
-	a = Number(a);
-	b = Number(b);
-	for (var i = a; i <= b; i++) {
-		t += String(i)+"</br>"
-	}
-
-	res.send(t);
-});
-
-app.get('/second', function (req, res) {
-	// Появляется alert с любым текстом
-	res.send(`
-		<script type="text/javascript">
-			alert("Hello");
-		</script>
-		`);
-});
-
-app.get('/site', function (req, res) {
-	var name = "Hey";
-	var text = "azazazazazazazazazazazazazaz"
-	var a = "John"
-
-	res.render('index', {title:"Article", name:name,
-		text: text, author: a})
-});
-
-app.get('/p', function(req, res){
-	let id = req.query.id;
-
-	sql = `SELECT * FROM Posts WHERE id=${id}`;
-	db.each(sql, function(err, row) {
-		let title = row.title
-		let text = row.text
-		
-		res.send(`
-		<h2>${title}</h2>
-		<h3>Статья <i>${id}</i></h3>
-		<hr>
-		<p>${text}</p>
-		`);
-	});
-});
-
-app.get('/all',  function(req, res){
-	let id = req.query.id;
-
-	sql = `SELECT * FROM Posts`;
-	var page ='';
-	db.each(sql, function(err, row){
-		let title = row.title
-		let text  = row.text
-		console.log(title);
-		page +=`
-			<h2> ${title} </h2>
-			<hr>
-			`
-
+app.post('/signup', function(req, res){
+	if(!req.body.id || !req.body.password){
+		res.status("400");
+		res.send("Invalid details!");
+	} else {
+		Users.filter(function(user){
+			if(user.id === req.body.id){
+				res.render('signup', {
+					message: "User Already Exists! Login or choose another user id"});
+			}
 		});
-	
-	res.send(page);
-
-	
+		var newUser = {id: req.body.id, password: req.body.password};
+		Users.push(newUser);
+		req.session.user = newUser;
+		res.redirect('/protected_page');
+	}
+});
+function checkSignIn(req, res){
+	if(req.session.user){
+		next();     //If session exists, proceed to page
+	} else {
+		var err = new Error("Not logged in!");
+		console.log(req.session.user);
+		next(err);  //Error, trying to access unauthorized page!
+	}
+}
+app.get('/protected_page', checkSignIn, function(req, res){
+	res.render('protected_page', {id: req.session.user.id})
 });
 
-// pug
-
-app.listen(3000, function () {
-	console.log('I am alive! On 3000');
+app.get('/login', function(req, res){
+	res.render('login');
 });
 
+app.post('/login', function(req, res){
+	console.log(Users);
+	if(!req.body.id || !req.body.password){
+		res.render('login', {message: "Please enter both id and password"});
+	} else {
+		Users.filter(function(user){
+			if(user.id === req.body.id && user.password === req.body.password){
+				req.session.user = user;
+				res.redirect('/protected_page');
+			}
+		});
+		res.render('login', {message: "Invalid credentials!"});
+	}
+});
 
+app.get('/logout', function(req, res){
+	req.session.destroy(function(){
+		console.log("user logged out.")
+	});
+	res.redirect('/login');
+});
 
+app.use('/protected_page', function(err, req, res, next){
+	console.log(err);
+	//User should be authenticated! Redirect him to log in.
+	res.redirect('/login');
+});
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+app.listen(3000);
