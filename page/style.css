@@ -6,3 +6,12 @@ body {
 .card {
 	color: #F74053;
 }
+
+.profile {
+	background-color: #ffbeae;
+	border-radius: 20px;
+}
+
+.profile img {
+	border-radius: 50px;
+}
