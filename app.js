@@ -24,7 +24,7 @@ app.use(cookieSession({
 
 
 app.get('/login', urlencodedParser, function(req, res){
-	res.sendFile(__dirname + "/login.html");
+	res.sendFile(__dirname + "/login.pug");
 });
 
 app.post('/login', urlencodedParser, function(req, res){
@@ -68,7 +68,7 @@ app.get('/whoami', urlencodedParser, function(req, res){
 
 
 app.get('/register', urlencodedParser, function(req, res){
-	res.sendFile(__dirname + "/index.html");
+	res.sendFile(__dirname + "/index.pug");
 });
 
 
@@ -130,7 +130,7 @@ app.get('/', function (req, res) {
 			<li>`+3*99+`</li>
 		</ul>
 		`);
-	// res.sendFile(__dirname + "/public/index.html")
+	// res.sendFile(__dirname + "/public/index.pug")
 });
 
 app.get('/first', function (req, res) {
@@ -158,12 +158,7 @@ app.get('/second', function (req, res) {
 });
 
 app.get('/site', function (req, res) {
-	var name = "Hey";
-	var text = "azazazazazazazazazazazazazaz"
-	var a = "John"
-
-	res.render('index', {title:"Article", name:name,
-		text: text, author: a})
+	res.render('index')
 });
 
 app.get('/p', function(req, res){
@@ -204,30 +199,6 @@ app.get('/all',  function(req, res){
 
 });
 
-app.listen(3000, function () {
+app.listen(4000, function () {
 	console.log('I am alive! On 3000');
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
